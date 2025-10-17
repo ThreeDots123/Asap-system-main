@@ -1,5 +1,5 @@
 import Factory from "./factory.json";
-import Router from "./router.json";
+import Router from "./server-router.json";
 import PairERC20 from "./pair-erc20.json";
 
 // Uniswap V2 ABIs
