@@ -28,8 +28,8 @@ export class MerchantWithSettlementAccountGuard extends VerifiedMerchant {
     if (
       !merchant.settlementAccount ||
       !merchant.settlementAccount.accountName ||
-      merchant.settlementAccount.accountNumber ||
-      merchant.settlementAccount.bank
+      !merchant.settlementAccount.accountNumber ||
+      !merchant.settlementAccount.bank
     )
       throw new UnauthorizedException(
         "Merchant not allowed to access this route. Settlement account not yet set up.",

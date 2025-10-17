@@ -46,7 +46,7 @@ export class MerchantController {
     };
   }
 
-  @Patch()
+  @Patch("me")
   @UseGuards(VerifiedMerchant)
   async updateProfile(
     @Body() _body: UpdateMerchantDto,

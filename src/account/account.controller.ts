@@ -216,6 +216,7 @@ export class AccountController {
   @Post("merchant/register")
   async createMerchantAccount(
     @Body() _body: RegisterMerchantDto,
+    @Headers() header: ClientTypeHeaderDto,
     @Session() session: SessionPayload,
   ) {
     const { authorizationTokens, merchant } =
@@ -223,13 +224,19 @@ export class AccountController {
 
     // Save refresh token to user session if client is web but for now the user section is controlled by a mobile app
 
-    session.refreshToken = authorizationTokens.refresh.token;
-    session.refreshId = authorizationTokens.refresh.id;
+    if (header["x-client-type"] !== "mobile") {
+      session.refreshToken = authorizationTokens.refresh.token;
+      session.refreshId = authorizationTokens.refresh.id;
+    }
 
     return {
       message: "Merchant registered successfully",
       merchant,
       accessToken: authorizationTokens.access,
+      ...(header["x-client-type"] === "mobile" && {
+        refreshToken: authorizationTokens.refresh.token,
+        refreshId: authorizationTokens.refresh.id,
+      }),
     };
   }
 
@@ -237,6 +244,7 @@ export class AccountController {
   @HttpCode(200)
   async signInMerchantToAccount(
     @Body() _body: LoginMerchantDto,
+    @Headers() header: ClientTypeHeaderDto,
     @Session() session: SessionPayload,
   ) {
     const { password, email } = _body;
@@ -245,14 +253,20 @@ export class AccountController {
     const { merchant, authorizationTokens } =
       await this.authService.signInMerchant(email, password, refreshTokenId);
 
-    // Save refresh token to user session if client is web but for now the user section is controlled by a mobile app
-    session.refreshToken = authorizationTokens.refresh.token;
-    session.refreshId = authorizationTokens.refresh.id;
+    if (header["x-client-type"] !== "mobile") {
+      // Save refresh token to user session if client is web but for now the user section is controlled by a mobile app
+      session.refreshToken = authorizationTokens.refresh.token;
+      session.refreshId = authorizationTokens.refresh.id;
+    }
 
     return {
       message: "Sign in successful.",
       merchant,
       accessToken: authorizationTokens.access,
+      ...(header["x-client-type"] === "mobile" && {
+        refreshToken: authorizationTokens.refresh.token,
+        refreshId: authorizationTokens.refresh.id,
+      }),
     };
   }
 
