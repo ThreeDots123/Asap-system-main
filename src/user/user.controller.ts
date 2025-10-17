@@ -4,9 +4,7 @@ import {
   Controller,
   Get,
   Patch,
-  Post,
   Req,
-  Session,
   UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
