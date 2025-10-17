@@ -1,6 +1,6 @@
-import Factory from "./Factory.json";
-import Router from "./Router.json";
-import PairERC20 from "./PairERC20.json";
+import Factory from "./factory.json";
+import Router from "./router.json";
+import PairERC20 from "./pair-erc20.json";
 
 // Uniswap V2 ABIs
 export const UNISWAP_ROUTER_V2_ABI = Router;
