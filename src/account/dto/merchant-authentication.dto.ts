@@ -14,6 +14,11 @@ export class RegisterMerchantDto {
 
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => value?.trim().toLowerCase())
+  fullname: string;
+
+  @IsNotEmpty()
+  @IsString()
   password: string;
 
   contactNumber?: string;

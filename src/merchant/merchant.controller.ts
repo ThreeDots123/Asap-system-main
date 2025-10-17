@@ -54,7 +54,11 @@ export class MerchantController {
   ) {
     const { id } = request.merchant as MerchantDocument;
 
-    const { settlementAccount } = _body;
+    const {
+      settlementAccount,
+      websiteUrl: updatedWebsiteUrl,
+      contactNumber: updatedContactInfo,
+    } = _body;
 
     const updateOps = {};
 
@@ -69,13 +73,27 @@ export class MerchantController {
         updateOps["settlementAccount.bank"] = settlementAccount.bank;
     }
 
-    const { businessName, email, status, apiKey, secretKey } =
-      await this.merchantService.update(id, {
-        $set: updateOps,
-      });
+    if (updatedWebsiteUrl) updateOps["websiteUrl"] = updatedWebsiteUrl;
+    if (updatedContactInfo) updateOps["contactNumber"] = updatedContactInfo;
+
+    const {
+      businessName,
+      email,
+      status,
+      apiKey,
+      secretKey,
+      contactNumber,
+      websiteUrl,
+      fullname,
+    } = await this.merchantService.update(id, {
+      $set: updateOps,
+    });
 
     return {
       businessName,
+      contactNumber,
+      websiteUrl,
+      fullname,
       email,
       status,
       publicKey: apiKey,

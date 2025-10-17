@@ -48,6 +48,10 @@ export const ALCHEMY_ETH_SIGNING_KEY = "ALCHEMY_ETH_SIGNING_KEY";
 export const ALCHEMY_ETH_WEBHOOK_ID = "ALCHEMY_ETH_WEBHOOK_ID";
 export const ALCHEMY_BASE_WEBHOOK_ID = "ALCHEMY_BASE_WEBHOOK_ID";
 
+export const EMAIL_HOST = "EMAIL_HOST";
+export const EMAIL_USER = "EMAIL_USER";
+export const EMAIL_PASS = "EMAIL_USER_PASSWORD";
+
 // Ensure these important env credentials exists else fail before the server loads up
 dotenv.config();
 [
@@ -82,6 +86,9 @@ dotenv.config();
   ALCHEMY_ETH_SIGNING_KEY,
   ALCHEMY_ETH_WEBHOOK_ID,
   ALCHEMY_BASE_WEBHOOK_ID,
+  EMAIL_HOST,
+  EMAIL_PASS,
+  EMAIL_USER,
 ].forEach((key) => {
   const value = process.env[key];
   if (!value) throw new Error(`config error - missing env.${key}`);

@@ -10,6 +10,7 @@ import { EventModule } from "src/event/event.module";
 import { UserModule } from "src/user/user.module";
 import { SmsModule } from "src/sms/sms.module";
 import { MerchantModule } from "src/merchant/merchant.module";
+import { EmailModule } from "src/email/email.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MerchantModule } from "src/merchant/merchant.module";
     EventModule,
     UserModule,
     SmsModule,
+    EmailModule,
     forwardRef(() => MerchantModule),
   ],
   providers: [AuthService],

@@ -12,6 +12,7 @@ import { add } from "date-fns";
 import { CountryCode } from "libphonenumber-js";
 import { Model } from "mongoose";
 import * as speakeasy from "speakeasy";
+import { EmailService } from "src/email/email.service";
 import events from "src/event";
 import { EventService } from "src/event/event.service";
 import { MerchantAcctCreatedEvent } from "src/event/subscribers/account/merchant.subscriber";
@@ -62,6 +63,7 @@ export class AuthService {
     @InjectModel(InitiatedMFA.name)
     private InitiatedMFAModel: Model<InitiatedMFA>,
     private merchantService: MerchantService,
+    private emailService: EmailService,
   ) {}
 
   // ===========================================================================
@@ -160,6 +162,7 @@ export class AuthService {
   async registerMerchantDetails(data: {
     email: string;
     businessName: string;
+    fullname: string;
     password: string;
     contactNumber?: string;
     websiteUrl?: string;
@@ -170,9 +173,17 @@ export class AuthService {
 
     const keys = this.generateMerchantApiKeys();
 
-    const { email, businessName, password, contactNumber, websiteUrl } = data;
+    const {
+      email,
+      businessName,
+      password,
+      contactNumber,
+      websiteUrl,
+      fullname,
+    } = data;
     const newMerchant = await this.merchantService.createMerchant({
       email,
+      fullname,
       websiteUrl,
       businessName,
       contactNumber,
@@ -451,6 +462,19 @@ export class AuthService {
 
     try {
       // Example Email Otp (Not yet implementes)
+      await this.emailService.sendMail(
+        email,
+        "Verify your account",
+        `Please verify your email address by clicking the link below:
+
+        ${merchantOtp}
+
+        If you did not create an account with ASAP Merchant, please ignore this email.
+
+        Best regards,  
+        The {{appName}} Team
+      `,
+      );
       throw new InternalServerErrorException("Implement email sending service");
     } catch (err) {
       throw new InternalServerErrorException(

@@ -5,6 +5,7 @@ import { SmsModule } from "src/sms/sms.module";
 import { GatewayModule } from "src/gateway/gateway.module";
 import { subscribers } from "./subscribers";
 import { LiquidityProviderModule } from "src/liquidity-provider/liquidity-provider.module";
+import { EmailModule } from "src/email/email.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { LiquidityProviderModule } from "src/liquidity-provider/liquidity-provid
     SmsModule,
     GatewayModule,
     LiquidityProviderModule,
+    EmailModule,
   ],
   providers: [EventService, ...subscribers],
   exports: [EventEmitterModule, EventService],

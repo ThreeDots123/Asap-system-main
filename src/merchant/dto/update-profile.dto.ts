@@ -33,4 +33,20 @@ export class UpdateMerchantDto {
   @Type(() => SettlementDto)
   @Expose()
   settlementAccount?: SettlementDto;
+
+  @ApiProperty({
+    required: false,
+    description: "The contact information of the merchant",
+  })
+  @IsOptional()
+  @Expose()
+  contactNumber?: string;
+
+  @ApiProperty({
+    required: false,
+    description: "The website url of the merchant",
+  })
+  @IsOptional()
+  @Expose()
+  websiteUrl?: string;
 }

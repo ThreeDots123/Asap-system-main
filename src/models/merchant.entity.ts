@@ -26,6 +26,9 @@ export class Merchant {
   @Prop({ required: true })
   businessName: string;
 
+  @Prop({ required: true })
+  fullname: string;
+
   @Prop()
   contactNumber: string;
 

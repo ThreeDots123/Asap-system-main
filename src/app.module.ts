@@ -31,6 +31,7 @@ import { SendModule } from "./send/send.module";
 import { MerchantPosModule } from './merchant-pos/merchant-pos.module';
 import { UtilsModule } from './utils/utils.module';
 import { AddressMonitoringModule } from './address-monitoring/address-monitoring.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { AddressMonitoringModule } from './address-monitoring/address-monitoring
     MerchantPosModule,
     UtilsModule,
     AddressMonitoringModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
