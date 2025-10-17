@@ -1,0 +1,68 @@
+%% Combined Sequence + State Flow with Refund
+sequenceDiagram
+    participant UA as User A (Sender)
+    participant Client as Web/Mobile Client
+    participant Auth as Auth Service
+    participant Risk as Risk/Fraud Service
+    participant Ledger as Ledger Service
+    participant PayProc as Payment Processor/Rails
+    participant UB as User B (Recipient)
+    participant Notify as Notification Service
+
+    rect rgb(240, 248, 255)
+    note over Ledger: Transaction State: Created
+    UA->>Client: Initiate payment request
+    Client->>Auth: Verify session + MFA
+    Auth-->>Client: OK
+
+    Client->>Risk: Risk/Fraud check
+    Risk-->>Client: allow | challenge | block
+    alt challenge
+        Client->>Auth: MFA challenge
+        Auth-->>Client: OK
+    end
+
+    Client->>Ledger: Create payment {idempotency_key}
+    Ledger->>Ledger: Status = Authorized (funds hold)
+    Ledger-->>Client: Payment authorized
+    end
+
+    rect rgb(255, 250, 240)
+    note over Ledger: Transaction State: Settling
+    Ledger->>PayProc: Send to payment rails
+    alt success
+        PayProc-->>Ledger: Settlement confirmed
+        Ledger->>Ledger: Credit recipient\nStatus = Settled
+        Ledger->>Notify: Send receipts
+        Notify-->>UA: Sender receipt
+        Notify-->>UB: Recipient receipt
+    else failed
+        PayProc-->>Ledger: Settlement failed
+        Ledger->>Ledger: Release hold\nStatus = Failed
+        Ledger->>Notify: Failure notice
+        Notify-->>UA: Failure notice
+    end
+    end
+
+    rect rgb(245, 255, 245)
+    note over Ledger: Refund Flow (optional)
+    UA->>Client: Request refund
+    Client->>Ledger: Validate refund eligibility
+    alt eligible
+        Ledger->>Ledger: Create refund transaction\n(Status = Authorized)
+        Ledger->>PayProc: Reverse settlement / debit recipient
+        alt refund success
+            PayProc-->>Ledger: Refund settled
+            Ledger->>Ledger: Credit sender\nStatus = Settled
+            Ledger->>Notify: Refund confirmation
+            Notify-->>UA: Refund receipt
+            Notify-->>UB: Refund debit notice
+        else refund failed
+            PayProc-->>Ledger: Refund failed
+            Ledger->>Ledger: Mark refund transaction = Failed
+            Ledger->>Notify: Refund failure notice
+        end
+    else not eligible
+        Ledger->>Notify: Refund denied notice
+    end
+    end

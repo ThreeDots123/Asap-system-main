@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant Customer as Customer (Browser/App)
+    participant MerchantSite as Merchant Website/App
+    participant GatewaySDK as Your Payment SDK (Frontend)
+    participant GatewayAPI as Your Gateway API
+    participant Risk as Risk/Fraud Service
+    participant Ledger as Ledger Service
+    participant Settlement as Bank/Settlement Processor
+
+    Customer->>MerchantSite: Clicks "Pay ₦2000"
+    MerchantSite->>GatewaySDK: Calls SDK to initialize payment
+    GatewaySDK->>GatewayAPI: POST /payments/initiate {merchantKey, amount, currency, metadata}
+    GatewayAPI->>Risk: Run risk/fraud checks
+    Risk-->>GatewayAPI: Decision = "allow"
+    GatewayAPI->>Ledger: Create ledger entry (hold funds)
+    Ledger-->>GatewayAPI: OK (status=authorized)
+    GatewayAPI-->>GatewaySDK: Payment link / client_secret
+    Customer->>GatewaySDK: Completes payment (e.g., card/wallet)
+    GatewaySDK->>GatewayAPI: POST /payments/confirm {payment_id, token}
+    GatewayAPI->>Ledger: Finalize settlement (credit merchant)
+    GatewayAPI->>Settlement: Trigger bank payout
+    Ledger-->>GatewayAPI: Status=settled
+    GatewayAPI-->>MerchantSite: webhook {payment_succeeded}

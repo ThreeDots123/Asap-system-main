@@ -1,0 +1,37 @@
+
+flowchart TD
+
+    subgraph "User Journey"
+        A[User Logs In] --> B[Open Wallet Dashboard]
+        B --> C[View Default Base Wallet]
+        C --> D[Option: Add New Wallet]
+        D --> D1[Select Chain] --> D2[Integrate API] --> D3[New Wallet Created]
+        D3 --> E
+        
+        C --> E[View Assets & Balances]
+        E --> F[Initiate Send] --> F1[Select Asset] --> F2[Enter Amount] --> F3[Confirm Tx]
+        F3 --> F4{Sufficient Funds?}
+        F4 -->|Yes| F5[Forward to Custody] --> F6[Broadcast] --> F7[Update History]
+        F7 --> E
+        F4 -->|No| F8[Error]
+        
+        E --> G[Receive Flow: View Address] --> G1[Share] --> G2[Tx Detected] --> G3[Confirmed] --> G4[Update History]
+        G4 --> E
+        
+        E --> H[Transaction History]
+        E --> I[Swap Assets] --> I1[Route to Custody] --> I2[Update Balances]
+        I2 --> E
+    end
+
+    subgraph "Merchant Journey"
+        M[Merchant Logs In] --> N[Open Merchant Dashboard]
+        N --> O[View Merchant Wallets]
+        O --> P[Generate Payment Request] --> P1[Send Link/QR] --> P2[User Pays] --> P3[Route Funds] --> P4[Update History]
+        P4 --> O
+
+        O --> Q[Request Settlement] --> Q1[Select Type] --> Q2[Process Transfer] --> Q3[Update Balance] --> Q4[Confirmation]
+        Q4 --> O
+
+        O --> R[Reports & Analytics]
+        O --> S[Manage Integrations]
+    end
