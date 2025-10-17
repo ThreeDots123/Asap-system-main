@@ -6,6 +6,7 @@ import {
   REDIS_HOST,
   REDIS_PASSWORD,
   REDIS_PORT,
+  REDIS_URL,
 } from "src/config/env/list";
 
 export const REDIS_CLIENT = "REDIS_CLIENT";
@@ -22,16 +23,23 @@ export const REDIS_CLIENT = "REDIS_CLIENT";
         const port = configService.getOrThrow<number>(REDIS_PORT);
         const password = configService.getOrThrow<string>(REDIS_PASSWORD);
 
+        const url = configService.getOrThrow<string>(REDIS_URL);
+
         // Create and return the Redis client instance
         const client = createClient({
-          socket: {
-            host,
-            port,
-          },
-          ...(configService.getOrThrow<string>(NODE_ENV) === "production" && {
-            password,
-          }),
-          // ... Some options are missing which may be required in prod
+          ...(configService.getOrThrow<string>(NODE_ENV) === "production"
+            ? { url }
+            : {
+                socket: {
+                  host,
+                  port,
+                },
+                ...(configService.getOrThrow<string>(NODE_ENV) ===
+                  "production" && {
+                  password,
+                }),
+                // ... Some options are missing which may be required in prod
+              }),
         });
 
         await client.connect(); // <-- Connect explicitly
