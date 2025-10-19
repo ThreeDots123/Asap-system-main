@@ -164,6 +164,7 @@ export class YellowCardProviderProcessor
               country,
             },
             forceAccept: true,
+            // customerType: userType === "regular" ? "retail" : "retail",
             customerType: userType === "regular" ? "retail" : "institution",
             customerUID: "customer_" + userId,
             sender: {

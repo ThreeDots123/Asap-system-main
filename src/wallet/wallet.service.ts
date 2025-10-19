@@ -345,6 +345,15 @@ export class WalletService {
     }).save();
   }
 
+  async updateExternalWalletToSettled(address: string) {
+    await this.externalWalletModel.updateOne(
+      {
+        address,
+      },
+      { status: ExternalWalletStatus.SETTLED },
+    );
+  }
+
   async retrieveSingleExternalWalletAddress(
     address: string,
   ): Promise<ExternalWalletDocument | null> {

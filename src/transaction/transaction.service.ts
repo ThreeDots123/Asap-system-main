@@ -442,7 +442,32 @@ export class TransactionService {
     });
   }
 
-  async authorizeTransaction(pin: string, mfaToken?: string) {}
+  async retrieveMerchantPosTransactions(
+    merchantId: Types.ObjectId,
+    query?: { page?: number; limit?: number; status?: string },
+  ) {
+    const { page = 1, limit = 20, status } = query || {};
+    const filter: any = { merchantId, paymentType: MerchantPaymentType.POS };
+    if (status) filter.status = status;
+
+    const [transactions, total] = await Promise.all([
+      this.transactionModel
+        .find(filter)
+        .select("amount currency status createdAt") // summary fields only
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      this.transactionModel.countDocuments(filter),
+    ]);
+
+    return {
+      total,
+      page,
+      limit,
+      data: transactions,
+    };
+  }
 
   private generateTransactionReference(prefix: string, length: number = 8) {
     // Validate prefix to ensure it's clean

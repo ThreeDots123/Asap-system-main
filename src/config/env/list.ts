@@ -52,6 +52,8 @@ export const EMAIL_HOST = "EMAIL_HOST";
 export const EMAIL_USER = "EMAIL_USER";
 export const EMAIL_PASS = "EMAIL_USER_PASSWORD";
 
+export const CORS_WHITELIST_URLS = "CORS_WHITELIST_URLS";
+
 // Ensure these important env credentials exists else fail before the server loads up
 dotenv.config();
 [
@@ -89,6 +91,7 @@ dotenv.config();
   EMAIL_HOST,
   EMAIL_PASS,
   EMAIL_USER,
+  CORS_WHITELIST_URLS,
 ].forEach((key) => {
   const value = process.env[key];
   if (!value) throw new Error(`config error - missing env.${key}`);

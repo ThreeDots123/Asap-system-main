@@ -53,6 +53,7 @@ export class OfframpService {
     });
 
     await offrampTxn.save();
+    console.log("Processing");
 
     return {
       message: "Your asset has been processed sucessfully. Processing payout.",

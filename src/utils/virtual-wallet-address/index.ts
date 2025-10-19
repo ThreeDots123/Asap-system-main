@@ -39,6 +39,14 @@ export default class ExternalWalletAddressUtil {
     });
   }
 
+  async markExternalAddressAsSettled(address: string) {
+    try {
+      await this.walletService.updateExternalWalletToSettled(address);
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
   async walletAddressBalance(chain: AvailableWalletChains, address: string) {
     const provider = this.processProvider(chain);
 

@@ -16,12 +16,14 @@ import { Types } from "mongoose";
 import { MerchantWithSettlementAccountGuard } from "src/auth/guards/merchant/merchant-with-settlementAcct.guard";
 import { UpdateMerchantDto } from "./dto/update-profile.dto";
 import { MerchantService } from "./merchant.service";
+import { TransactionService } from "src/transaction/transaction.service";
 
 @Controller("merchant")
 export class MerchantController {
   constructor(
     private merchantService: MerchantService,
     private merchantPosService: MerchantPosService,
+    private transactionService: TransactionService,
   ) {}
 
   @Get("me")
@@ -123,5 +125,12 @@ export class MerchantController {
       message: "Transaction initiated successfully",
       ...result,
     };
+  }
+
+  @Get("pos/transactions")
+  @UseGuards(VerifiedMerchant)
+  async retrieveMerchantTransactions(@Req() request: Request) {
+    const { _id } = request.merchant as MerchantDocument;
+    // return this.transactionService.retrieveMerchantPosTransactions(_id as Types.ObjectId, query);
   }
 }

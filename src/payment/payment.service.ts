@@ -88,7 +88,7 @@ export class PaymentService {
     initiatedOfframpTxn.status = PaymentTransactionStatus.AUTHORIZED;
 
     await merchantTransaction.save();
-    initiatedOfframpTxn.save();
+    await initiatedOfframpTxn.save();
 
     if (walletUsed === "external")
       return initiatedOfframpTxn.transactionReference;

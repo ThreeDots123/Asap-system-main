@@ -36,13 +36,13 @@ export abstract class AbstractAddressMonitoringProcessor {
     // Get that address from our database
     const foundAddressWlt =
       await this.baseWalletService.retrieveSingleExternalWalletAddress(address);
+
     if (!foundAddressWlt) return;
 
     const balance = await this.baseExternalWalletAddrUtil.walletAddressBalance(
       foundAddressWlt.chain,
       address,
     );
-    console.log(`Balance: ${balance}`);
 
     if (balance >= foundAddressWlt.amount) {
       if (foundAddressWlt.usedFor === "merchant") {
@@ -52,6 +52,7 @@ export abstract class AbstractAddressMonitoringProcessor {
           await this.baseTransactionService.retrieveMerchantTransactionByAddress(
             foundAddressWlt.address,
           );
+
         if (!merchantTxn) return;
 
         let offrampTxnReference: string;
@@ -104,6 +105,10 @@ export abstract class AbstractAddressMonitoringProcessor {
         // Process offramping and payout
         await this.basePaymentService.processPaymentUsingReference(
           offrampTxnReference,
+        );
+
+        this.baseWalletService.updateExternalWalletToSettled(
+          foundAddressWlt.address,
         );
       }
 
