@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Req,
@@ -36,6 +37,7 @@ export class MerchantController {
       status,
       apiKey,
       secretKey,
+      fullname,
     } = request.merchant as MerchantDocument;
 
     return {
@@ -44,6 +46,7 @@ export class MerchantController {
       status,
       publicKey: apiKey,
       secretKey,
+      fullname,
       ...(settlementAccount && { ...settlementAccount }),
     };
   }
@@ -131,6 +134,21 @@ export class MerchantController {
   @UseGuards(VerifiedMerchant)
   async retrieveMerchantTransactions(@Req() request: Request) {
     const { _id } = request.merchant as MerchantDocument;
-    // return this.transactionService.retrieveMerchantPosTransactions(_id as Types.ObjectId, query);
+    return this.transactionService.retrieveMerchantPosTransactions(
+      _id as Types.ObjectId,
+    );
+  }
+
+  @Get("pos/transactions/:reference")
+  @UseGuards(VerifiedMerchant)
+  async retrieveSingleMerchantTransaction(
+    @Req() request: Request,
+    @Param("reference") reference: string,
+  ) {
+    const { _id } = request.merchant as MerchantDocument;
+    return this.transactionService.retrieveMerchantTransactionDetails(
+      _id as Types.ObjectId,
+      reference,
+    );
   }
 }

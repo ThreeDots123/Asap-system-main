@@ -3,9 +3,10 @@ import { LiquidityProviderService } from "./liquidity-provider.service";
 import LIQUIDITY_PROVIDER_PROCESSORS from ".";
 import { ProviderRegistryService } from "./registry.service";
 import { TransactionModule } from "src/transaction/transaction.module";
+import { GatewayModule } from "src/gateway/gateway.module";
 
 @Module({
-  imports: [TransactionModule],
+  imports: [TransactionModule, GatewayModule],
   providers: [
     LiquidityProviderService,
     ProviderRegistryService,

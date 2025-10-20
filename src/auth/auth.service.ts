@@ -475,8 +475,12 @@ export class AuthService {
         The {{appName}} Team
       `,
       );
-      throw new InternalServerErrorException("Implement email sending service");
+
+      return {
+        message: "Your OTP Email has been sent",
+      };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(
         "Unable to send otp email at this moment.",
       );

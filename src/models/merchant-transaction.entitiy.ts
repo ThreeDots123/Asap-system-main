@@ -10,6 +10,7 @@ export enum MerchantTransactionStatus {
   INITIATED = "initiated", // Created but not yet confirmed
   AUTHORIZED = "authorized", // Payment method verified (e.g., wallet approved)
   COMPLETED = "completed", // Funds successfully captured
+  PROCESSING = "processing", // Funds transfer is being processed.
   FAILED = "failed", // Declined or error
   REFUNDED = "refunded", // Reversed by merchant
   CANCELLED = "cancelled", // Cancelled before completion

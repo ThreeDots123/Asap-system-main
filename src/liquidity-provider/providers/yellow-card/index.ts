@@ -41,6 +41,7 @@ import {
 import { CountryCode } from "libphonenumber-js";
 import { TransactionService } from "src/transaction/transaction.service";
 import { PaymentTransactionStatus } from "src/models/offramp-transaction";
+import { SocketGateway } from "src/gateway/socket.gateway";
 
 export const providerId = LiquidityProviderProcessorType.YC;
 
@@ -52,8 +53,9 @@ export class YellowCardProviderProcessor
   constructor(
     private configService: ConfigService,
     private transactionService: TransactionService,
+    private socketGateway: SocketGateway,
   ) {
-    super(transactionService);
+    super(transactionService, socketGateway);
   }
 
   private readonly FEE = 50;
@@ -164,8 +166,8 @@ export class YellowCardProviderProcessor
               country,
             },
             forceAccept: true,
-            // customerType: userType === "regular" ? "retail" : "retail",
-            customerType: userType === "regular" ? "retail" : "institution",
+            customerType: userType === "regular" ? "retail" : "retail",
+            // customerType: userType === "regular" ? "retail" : "institution",
             customerUID: "customer_" + userId,
             sender: {
               // Get stored KYC for user, use placeholder for now

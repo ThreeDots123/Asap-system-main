@@ -11,13 +11,20 @@ import {
   PayoutWebhookEvent,
 } from "src/common/types/liquidity-provider";
 import { UserType } from "src/common/types/wallet-custody";
+import { emittedEvents } from "src/gateway/events";
+import { SocketGateway } from "src/gateway/socket.gateway";
+import { MerchantTransactionStatus } from "src/models/merchant-transaction.entitiy";
+import { PaymentTransactionStatus } from "src/models/offramp-transaction";
 import { TransactionService } from "src/transaction/transaction.service";
 
 @Injectable()
 export abstract class AbstractLiquidityProvider {
   protected abstract readonly providerId: LiquidityProviderProcessorType;
 
-  constructor(private baseTransactionService: TransactionService) {}
+  constructor(
+    private baseTransactionService: TransactionService,
+    private baseSocketGateway: SocketGateway,
+  ) {}
 
   /**
    * Provider-specific implementation to get provider ID
@@ -58,7 +65,6 @@ export abstract class AbstractLiquidityProvider {
     if (!result.success) throw new BadRequestException(result.error);
 
     // Save transaction entry to ledger money debited from platform hot wallet (No here tho)
-
     // Credit - Platform's hot wallet (Liquidity provider balance is reduced by a specified amount we are to send to a user)
 
     return result.result;
@@ -82,6 +88,61 @@ export abstract class AbstractLiquidityProvider {
 
     // Update the transaction status
     transaction.status = response.status;
+
+    // Check if this offramp transaction is attached to a merchant's payment transaction
+    const merchantTxn =
+      await this.baseTransactionService.retrieveMerchantTransactionByOfframId(
+        transaction._id as Types.ObjectId,
+      );
+
+    if (merchantTxn) {
+      // Update the transaction status based on the offramp flow state
+      switch (response.status) {
+        case PaymentTransactionStatus.PENDING:
+          merchantTxn.status = MerchantTransactionStatus.PROCESSING;
+          break;
+        case PaymentTransactionStatus.COMPLETED: {
+          merchantTxn.status = MerchantTransactionStatus.COMPLETED;
+
+          const {
+            amount,
+            currency,
+            coinAsset: { asset, chain, amount: coinAmount },
+          } = merchantTxn;
+
+          // Flow state is completed and send socket event to merchant
+          const room = this.baseSocketGateway.createRoomName(
+            merchantTxn.merchantId.toString(),
+          );
+
+          this.baseSocketGateway.server
+            .to(room)
+            .emit(emittedEvents.completedMerchantPayment, {
+              message: "Payment Recieved!!",
+              transaction: {
+                amount,
+                currency,
+                chain,
+                chainAsset: asset,
+                coinAmount,
+                fromAddr: transaction.fromAddr,
+              },
+            });
+          break;
+        }
+        case PaymentTransactionStatus.FAILED:
+          merchantTxn.status = MerchantTransactionStatus.FAILED;
+          // Send event too?
+          break;
+
+        default:
+          break;
+      }
+
+      // Other events will be updated wherever they are used
+      merchantTxn.save();
+    }
+
     await transaction.save();
   }
 

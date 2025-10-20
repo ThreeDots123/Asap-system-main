@@ -47,7 +47,9 @@ export class OfframpService {
     }
 
     const { offrampTxn } = data;
+
     offrampTxn.status = PaymentTransactionStatus.FUNDED;
+
     this.eventService.emit(funded, {
       event: new OfframTransactionFundedEvent(offrampTxn),
     });

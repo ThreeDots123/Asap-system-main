@@ -451,9 +451,9 @@ export class TransactionService {
     if (status) filter.status = status;
 
     const [transactions, total] = await Promise.all([
-      this.transactionModel
+      this.merchantTransactionModel
         .find(filter)
-        .select("amount currency status createdAt") // summary fields only
+        .select("amount currency status createdAt reference") // summary fields only
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
@@ -467,6 +467,35 @@ export class TransactionService {
       limit,
       data: transactions,
     };
+  }
+
+  async retrieveMerchantTransactionDetails(
+    merchantId: Types.ObjectId,
+    reference: string,
+  ) {
+    const query = {
+      merchantId,
+      reference,
+    };
+
+    const transaction = await this.merchantTransactionModel
+      .findOne(query)
+      .select("-paymentMethod -createdAt -updatedAt")
+      .populate("merchantId", "fullname email businessName")
+      .populate("exchangeRate", "rates")
+      .lean();
+
+    if (!transaction) {
+      throw new NotFoundException("Transaction not found");
+    }
+
+    return transaction;
+  }
+
+  async retrieveMerchantTransactionByOfframId(
+    offrampId: Types.ObjectId,
+  ): Promise<MerchantTransactionDocument | null> {
+    return this.merchantTransactionModel.findOne({ offrampId });
   }
 
   private generateTransactionReference(prefix: string, length: number = 8) {

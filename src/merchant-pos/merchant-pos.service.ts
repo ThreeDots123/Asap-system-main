@@ -123,6 +123,6 @@ export class MerchantPosService {
   }
 
   private generatePaymentInternalTxnId() {
-    return `transactionId`;
+    return `Not implemented`;
   }
 }
