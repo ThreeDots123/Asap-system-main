@@ -3,7 +3,6 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CreateExchangeRateDto } from "./dto/adding-rate.dto";
 import { Request } from "express";
 import { RateService } from "./rate.service";
-import { UserDocument } from "src/models/user.entity";
 import { Types } from "mongoose";
 
 @Controller("rate")
