@@ -24,6 +24,7 @@ import {
   MerchantPaymentType,
   MerchantTransaction,
   MerchantTransactionDocument,
+  MerchantTransactionStatus,
 } from "src/models/merchant-transaction.entitiy";
 import { UserDocument } from "src/models/user.entity";
 import {
@@ -444,6 +445,53 @@ export class TransactionService {
     });
   }
 
+  async retieveAllMerchantTransactions(
+    merchantId: Types.ObjectId,
+    query?: { page?: number; limit?: number; status?: string },
+  ) {
+    const { page = 1, limit = 20, status } = query || {};
+    const filter: any = { merchantId, paymentType: MerchantPaymentType.POS };
+    if (status) filter.status = status;
+
+    const [transactions, total] = await Promise.all([
+      this.merchantTransactionModel
+        .find(filter)
+        .select("amount currency status createdAt reference") // summary fields only
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      this.transactionModel.countDocuments(filter),
+    ]);
+
+    return {
+      total,
+      page,
+      limit,
+      data: transactions,
+    };
+  }
+
+  async retrieveMerchantProcessedPaymentAmt(merchantId: Types.ObjectId) {
+    const total = await this.merchantTransactionModel.aggregate([
+      {
+        $match: {
+          merchantId: new Types.ObjectId(merchantId),
+          status: MerchantTransactionStatus.COMPLETED, // only count successfully processed ones
+        },
+      },
+      {
+        $group: {
+          _id: "$merchantId",
+          totalAmount: { $sum: { $toDouble: "$amount" } },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    return total;
+  }
+
   async retrieveMerchantPosTransactions(
     merchantId: Types.ObjectId,
     query?: { page?: number; limit?: number; status?: string },
@@ -492,6 +540,27 @@ export class TransactionService {
     }
 
     return transaction;
+  }
+
+  async retrieveMerchantPosProcessedPaymentAmt(merchantId: Types.ObjectId) {
+    const total = await this.merchantTransactionModel.aggregate([
+      {
+        $match: {
+          merchantId: new Types.ObjectId(merchantId),
+          status: MerchantTransactionStatus.COMPLETED, // only count successfully processed ones
+          paymentType: MerchantPaymentType.POS,
+        },
+      },
+      {
+        $group: {
+          _id: "$merchantId",
+          totalAmount: { $sum: { $toDouble: "$amount" } },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    return total;
   }
 
   async retrieveMerchantTransactionByOfframId(
