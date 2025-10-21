@@ -38,9 +38,11 @@ export class MerchantController {
       apiKey,
       secretKey,
       fullname,
+      id,
     } = request.merchant as MerchantDocument;
 
     return {
+      id,
       businessName,
       email,
       status,
@@ -104,6 +106,7 @@ export class MerchantController {
       publicKey: apiKey,
       secretKey,
       settlementAccount,
+      id,
     };
   }
 
