@@ -4,6 +4,7 @@ import { CreateExchangeRateDto } from "./dto/adding-rate.dto";
 import { Request } from "express";
 import { RateService } from "./rate.service";
 import { Types } from "mongoose";
+import { FiatConversionDto } from "./dto/fiat-conversion.dto";
 
 @Controller("rate")
 @ApiTags("exchange-rates")
@@ -32,5 +33,15 @@ export class RateController {
       baseCurrency,
       rates,
     };
+  }
+
+  @Post("convert")
+  async getCoinConversion(@Body() _body: FiatConversionDto) {
+    const { amount, fiatCurrency, coinAsset } = _body;
+
+    return this.exchangeRateService.convertAssets(amount, {
+      from: fiatCurrency,
+      to: coinAsset,
+    });
   }
 }
