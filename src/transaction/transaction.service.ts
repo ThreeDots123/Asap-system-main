@@ -359,7 +359,9 @@ export class TransactionService {
   ): Promise<MerchantTransactionDocument> {
     return new this.merchantTransactionModel({
       merchantId,
-      reference: this.generateTransactionReference("POS"),
+      reference: this.generateTransactionReference(
+        opts.transactionType === MerchantPaymentType.POS ? "POS" : "SDK",
+      ),
       amount: amountToAccept.amount,
       currency: amountToAccept.currency,
       paymentMethod,
