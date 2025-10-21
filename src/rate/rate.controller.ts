@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CreateExchangeRateDto } from "./dto/adding-rate.dto";
 import { Request } from "express";
@@ -23,5 +23,15 @@ export class RateController {
       dto,
       123456 as unknown as Types.ObjectId,
     );
+  }
+
+  @Get("current")
+  async getCurrentRate() {
+    const { baseCurrency, rates } =
+      await this.exchangeRateService.getCurrentRates();
+    return {
+      baseCurrency,
+      rates,
+    };
   }
 }
