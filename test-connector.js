@@ -4,7 +4,7 @@ const socket = io("http://localhost:5000", {
   auth: {
     userId: "68ef9669fb166e2503b973fd",
     token:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OGVmOTY2OWZiMTY2ZTI1MDNiOTczZmQiLCJyb2xlIjoibWVyY2hhbnQiLCJpYXQiOjE3NjA5MTg4ODgsImV4cCI6MTc2MDkyMjQ4OH0.MG3AQA8TbhC2o_2aTwRKBSkNZEcqSTAfZ5ymWcMOFFQ",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OGVmOTY2OWZiMTY2ZTI1MDNiOTczZmQiLCJyb2xlIjoibWVyY2hhbnQiLCJpYXQiOjE3NjA5Njg0MzksImV4cCI6MTc2MDk3MjAzOX0.J_lN8uss9cbYfBo0cgUCbS3TdjH9XusFcHActt2nOjE",
   },
   reconnection: true,
 });
@@ -31,6 +31,6 @@ socket.on("balance.refresh", (tx) => {
 });
 
 // Example: transaction events for merchant (Payment recieved)
-socket.on("payment.recieved", (pmt) => {
+socket.on("merchant.payment.completed", (pmt) => {
   console.log("Payment recieved:", pmt);
 });

@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { randomBytes } from "crypto";
+import crypto from "crypto";
 import { add } from "date-fns";
 import { CountryCode } from "libphonenumber-js";
 import { Model } from "mongoose";
@@ -171,7 +171,7 @@ export class AuthService {
 
     if (existing) throw new BadRequestException("Merchant already exists");
 
-    const keys = this.generateMerchantApiKeys();
+    const keys = this.generateMerchantApiKeys("live");
 
     const {
       email,
@@ -814,10 +814,14 @@ export class AuthService {
    * @private
    * @returns {{apiKey: string; secretKey: string}} The ApiKey credentials for a merchant
    */
-  private generateMerchantApiKeys() {
+  private generateMerchantApiKeys(mode: "test" | "live") {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+      modulusLength: 2048, // RSA 2048-bit encryption
+    });
+
     return {
-      apiKey: `pub_${randomBytes(32).toString("hex")}`,
-      secretKey: `sec_${randomBytes(36).toString("hex")}`,
+      publicKey: `pub_${mode}_${publicKey}`,
+      secretKey: `sec_${mode}_${privateKey}`,
     };
   }
 }

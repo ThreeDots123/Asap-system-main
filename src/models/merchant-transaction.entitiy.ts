@@ -19,6 +19,7 @@ export enum MerchantTransactionStatus {
 export enum MerchantPaymentType {
   POS = "pos", // Created but not yet confirmed,
   SDK_INTERNAL = "sdk.internal_wallet",
+  SDK_EXTERNAL = "sdk.external_wallet",
 }
 
 export interface MerchantPaymentMethod {

@@ -9,19 +9,17 @@ import { RateService } from "src/rate/rate.service";
 import { TransactionService } from "src/transaction/transaction.service";
 import ExternalWalletAddressUtil from "src/utils/virtual-wallet-address";
 
-// Offramp payment can work for sdk, But unlikely for POS
-
 @Injectable()
-export class MerchantPosService {
+export class MerchantSdkService {
   constructor(
     private paymentService: PaymentService,
-    private transactionService: TransactionService,
-    private externalWalletAddrUtil: ExternalWalletAddressUtil,
     private rateService: RateService,
+    private externalWalletAddrUtil: ExternalWalletAddressUtil,
     private addressMonitoringService: AddressMonitoringService,
+    private transactionService: TransactionService,
   ) {}
 
-  async intitatePOSPayment(
+  async initatePaymentWithExternalWlt(
     merchantId: Types.ObjectId,
     amount: string,
     currency: CurrencyCode,
@@ -30,10 +28,9 @@ export class MerchantPosService {
       asset: string;
     },
   ) {
-    // Generate means to pay internally (ASAP) and through external wallet (The user chooses)
-
-    //  VALIDATIONS
+    // Validations
     // 1) Ensure amount is > 0
+
     try {
       const numericalAmount = Number(amount);
       if (!(numericalAmount > 0))
@@ -59,10 +56,6 @@ export class MerchantPosService {
       from: currency,
       to: coinAsset.asset,
     });
-
-    // --- Internally --- //
-    // Just generate a transactional id the user can input when paying
-    const transactionInternalId = this.generatePaymentInternalTxnId();
 
     // --- Externally --- //
     // Generate an external address for it
@@ -96,11 +89,10 @@ export class MerchantPosService {
           amount: cryptoAmountToPay,
         },
         {
-          internal: transactionInternalId,
           external: walletForExternalTransaction.address,
         },
         {
-          transactionType: MerchantPaymentType.POS,
+          transactionType: MerchantPaymentType.SDK_EXTERNAL,
           exchangeRate: rate._id as Types.ObjectId,
         },
       );
@@ -109,7 +101,6 @@ export class MerchantPosService {
     return {
       reference,
       amount,
-      // Rates
       coinEquivalent: {
         cryptoAmountToPay,
         ...coinAsset,
@@ -121,9 +112,5 @@ export class MerchantPosService {
         transferToAddress: paymentMethod.external,
       }),
     };
-  }
-
-  private generatePaymentInternalTxnId() {
-    return `Not implemented`;
   }
 }

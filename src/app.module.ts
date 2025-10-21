@@ -32,6 +32,7 @@ import { MerchantPosModule } from './merchant-pos/merchant-pos.module';
 import { UtilsModule } from './utils/utils.module';
 import { AddressMonitoringModule } from './address-monitoring/address-monitoring.module';
 import { EmailModule } from './email/email.module';
+import { MerchantSdkModule } from './merchant-sdk/merchant-sdk.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { EmailModule } from './email/email.module';
     UtilsModule,
     AddressMonitoringModule,
     EmailModule,
+    MerchantSdkModule,
   ],
   controllers: [AppController],
   providers: [AppService],

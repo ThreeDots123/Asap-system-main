@@ -48,6 +48,17 @@ export class MerchantService {
   }
 
   /**
+   * Finds a user by their unique ID.
+   * @param secretKey - The merchant's ID.
+   * @returns A merchant document or null if not found.
+   */
+  async findBySecretKey(secretKey: string): Promise<MerchantDocument | null> {
+    return this.merchantModel.findOne({
+      secretKey,
+    });
+  }
+
+  /**
    * Updates an existing merchant.
    *
    * @param {string} merchantId - The MongoDB ObjectId of the merchant to update.

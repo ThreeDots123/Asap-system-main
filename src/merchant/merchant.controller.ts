@@ -10,7 +10,6 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { VerifiedMerchant } from "src/auth/guards/merchant/verified-merchant.guard";
-import { InitiatePaymentDto } from "./dto/initiate-pos-payment.dto";
 import { MerchantDocument } from "src/models/merchant.entity";
 import { MerchantPosService } from "src/merchant-pos/merchant-pos.service";
 import { Types } from "mongoose";
@@ -18,6 +17,7 @@ import { MerchantWithSettlementAccountGuard } from "src/auth/guards/merchant/mer
 import { UpdateMerchantDto } from "./dto/update-profile.dto";
 import { MerchantService } from "./merchant.service";
 import { TransactionService } from "src/transaction/transaction.service";
+import { InitiatePaymentWithExternalWltDto } from "src/merchant-sdk/dto/initiate-payment-external-wlt.dto";
 
 @Controller("merchant")
 export class MerchantController {
@@ -111,10 +111,9 @@ export class MerchantController {
   @UseGuards(MerchantWithSettlementAccountGuard)
   async intiatePOSTransaction(
     @Req() request: Request,
-    @Body() _body: InitiatePaymentDto,
+    @Body() _body: InitiatePaymentWithExternalWltDto,
   ) {
     const { _id } = request.merchant as MerchantDocument;
-
     const { coin, currency, amount } = _body;
 
     const result = await this.merchantPosService.intitatePOSPayment(

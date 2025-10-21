@@ -22,7 +22,7 @@ class CoinDetailsDto {
   chain: AvailableWalletChains;
 }
 
-export class InitiatePaymentDto {
+export class InitiatePaymentWithExternalWltDto {
   @ApiProperty({ example: "2000", description: "Amount of fiat to be sent." })
   @Expose()
   @IsString()

@@ -26,6 +26,9 @@ export class Merchant {
   @Prop({ required: true })
   businessName: string;
 
+  @Prop({ type: Boolean, required: true, default: true })
+  isLive: boolean;
+
   @Prop({ required: true })
   fullname: string;
 
