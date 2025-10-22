@@ -450,7 +450,7 @@ export class TransactionService {
     query?: { page?: number; limit?: number; status?: string },
   ) {
     const { page = 1, limit = 20, status } = query || {};
-    const filter: any = { merchantId, paymentType: MerchantPaymentType.POS };
+    const filter: any = { merchantId };
     if (status) filter.status = status;
 
     const [transactions, total] = await Promise.all([
