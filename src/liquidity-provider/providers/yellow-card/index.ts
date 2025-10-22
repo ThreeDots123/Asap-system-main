@@ -7,7 +7,6 @@ import {
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosError, AxiosInstance } from "axios";
 import * as crypto from "crypto-js";
-import { v4 as UUID } from "uuid";
 import {
   CryptoAsset,
   FiatCurrency,
@@ -73,7 +72,7 @@ export class YellowCardProviderProcessor
       CryptoAsset.POLYGON_USDT,
       CryptoAsset.SOLANA_USDC,
       CryptoAsset.SOLANA_USDT,
-      CryptoAsset.BASE_USDC,
+      CryptoAsset.ETH_USDC,
       CryptoAsset.TRON_USDT,
     ],
     supportedFiatCurrencies: [FiatCurrency.NGN, FiatCurrency.GHC],

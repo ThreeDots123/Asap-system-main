@@ -560,7 +560,9 @@ export class TransactionService {
       },
     ]);
 
-    return total;
+    if (total.length === 0) return 0;
+
+    return total[0].totalAmount;
   }
 
   async retrieveMerchantTransactionByOfframId(

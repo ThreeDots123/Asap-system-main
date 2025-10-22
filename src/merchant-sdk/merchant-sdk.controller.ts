@@ -43,6 +43,26 @@ export class MerchantSdkController {
     };
   }
 
+  @Get("transactions")
+  @UseGuards(MerchantSDKGuard)
+  async getAllMerchantTransactions(@Req() request: Request) {
+    const { _id } = request.merchant as MerchantDocument;
+
+    return this.transactionService.retieveAllMerchantTransactions(
+      _id as Types.ObjectId,
+    );
+  }
+
+  @Get("transactions/total")
+  @UseGuards(MerchantSDKGuard)
+  async getMerchantTotalTransaction(@Req() request: Request) {
+    const { _id } = request.merchant as MerchantDocument;
+
+    return this.transactionService.retrieveMerchantProcessedPaymentAmt(
+      _id as Types.ObjectId,
+    );
+  }
+
   @Get("transactions/:reference")
   @UseGuards(MerchantSDKGuard)
   async retrieveSingleMerchantTransaction(

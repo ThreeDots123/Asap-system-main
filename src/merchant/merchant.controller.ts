@@ -110,26 +110,6 @@ export class MerchantController {
     };
   }
 
-  @Get("transactions")
-  @UseGuards(VerifiedMerchant)
-  async getAllMerchantTransactions(@Req() request: Request) {
-    const { _id } = request.merchant as MerchantDocument;
-
-    return this.transactionService.retieveAllMerchantTransactions(
-      _id as Types.ObjectId,
-    );
-  }
-
-  @Get("transactions/total")
-  @UseGuards(VerifiedMerchant)
-  async getMerchantTotalTransaction(@Req() request: Request) {
-    const { _id } = request.merchant as MerchantDocument;
-
-    return this.transactionService.retrieveMerchantProcessedPaymentAmt(
-      _id as Types.ObjectId,
-    );
-  }
-
   @Post("pos/initiate")
   @UseGuards(MerchantWithSettlementAccountGuard)
   async intiatePOSTransaction(
