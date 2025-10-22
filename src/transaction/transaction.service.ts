@@ -456,8 +456,10 @@ export class TransactionService {
     const [transactions, total] = await Promise.all([
       this.merchantTransactionModel
         .find(filter)
-        .select("amount currency status createdAt reference") // summary fields only
+        // .select("amount currency status createdAt reference") // summary fields only
         .sort({ createdAt: -1 })
+        .populate("merchantId", "fullname email businessName")
+        .populate("exchangeRate", "rates")
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
