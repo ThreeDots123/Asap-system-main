@@ -449,7 +449,8 @@ export class TransactionService {
     merchantId: Types.ObjectId,
     query?: { page?: number; limit?: number; status?: string },
   ) {
-    const { page = 1, limit = 20, status } = query || {};
+    // const { page = 1, limit = 20, status } = query || {};
+    const { page = 1, limit = 100, status } = query || {};
     const filter: any = { merchantId };
     if (status) filter.status = status;
 
