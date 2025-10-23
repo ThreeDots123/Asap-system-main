@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import {
   ALCHEMY_BASE_SIGNING_KEY,
   ALCHEMY_ETH_SIGNING_KEY,
+  ALCHEMY_USE_MAINNET,
   BLOCKRADAR_GLOBAL_API_KEY,
   YC_SECRET_KEY,
 } from "src/config/env/list";
@@ -135,7 +136,10 @@ export class WebhookController {
     const webhookEvent = _body as WebhookEventPayload;
 
     const signingKey =
-      webhookEvent.event.network === "BASE_SEPOLIA"
+      webhookEvent.event.network ===
+      (this.configService.getOrThrow(ALCHEMY_USE_MAINNET) === "true"
+        ? "BASE_MAINNET"
+        : "BASE_SEPOLIA")
         ? this.configService.getOrThrow(ALCHEMY_BASE_SIGNING_KEY)
         : this.configService.getOrThrow(ALCHEMY_ETH_SIGNING_KEY);
 
@@ -151,6 +155,7 @@ export class WebhookController {
             const [tx] = webhookEvent.event.activity;
             await this.addressMonitoringService.handleWalletActivity(
               tx.toAddress,
+              tx.fromAddress,
             );
             break;
           }

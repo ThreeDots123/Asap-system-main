@@ -32,7 +32,7 @@ export abstract class AbstractAddressMonitoringProcessor {
     await this.processStopMonitoringForAddresses(addresses, chain);
   }
 
-  async handleAddressActivityEvent(address: string) {
+  async handleAddressActivityEvent(address: string, addrSentFrom: string) {
     // Get that address from our database
     const foundAddressWlt =
       await this.baseWalletService.retrieveSingleExternalWalletAddress(address);
@@ -73,6 +73,7 @@ export abstract class AbstractAddressMonitoringProcessor {
                 rateId: merchantTxn.exchangeRate,
                 walletUsed: "external",
                 merchantTransaction: merchantTxn,
+                fromAddr: addrSentFrom,
                 bankDetails: {
                   code: merchant.settlementAccount.bank,
                   number: merchant.settlementAccount.accountNumber,

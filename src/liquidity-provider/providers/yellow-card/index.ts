@@ -17,7 +17,11 @@ import {
   ProviderCapabilities,
 } from "src/common/types/liquidity-provider";
 import { UserType } from "src/common/types/wallet-custody";
-import { YC_API_KEY, YC_SECRET_KEY } from "src/config/env/list";
+import {
+  ALCHEMY_USE_MAINNET,
+  YC_API_KEY,
+  YC_SECRET_KEY,
+} from "src/config/env/list";
 import { AbstractLiquidityProvider } from "src/interface/liquidity-provider/abstract-provider";
 import {
   ApiResponse,
@@ -49,19 +53,23 @@ export class YellowCardProviderProcessor
   extends AbstractLiquidityProvider
   implements OnModuleInit
 {
+  private readonly FEE = 50;
+  protected readonly providerId: LiquidityProviderProcessorType = providerId;
+  private readonly logger = new Logger(YellowCardProviderProcessor.name);
+  private baseUrl: string;
+  private httpClient: AxiosInstance;
+
   constructor(
     private configService: ConfigService,
     private transactionService: TransactionService,
     private socketGateway: SocketGateway,
   ) {
     super(transactionService, socketGateway);
+    this.baseUrl =
+      configService.getOrThrow(ALCHEMY_USE_MAINNET) === "true"
+        ? "https://api.yellowcard.io"
+        : "https://sandbox.api.yellowcard.io";
   }
-
-  private readonly FEE = 50;
-  protected readonly providerId: LiquidityProviderProcessorType = providerId;
-  private readonly logger = new Logger(YellowCardProviderProcessor.name);
-  private baseUrl = "https://sandbox.api.yellowcard.io";
-  private httpClient: AxiosInstance;
 
   private capabilities: ProviderCapabilities = {
     supportedAssets: [
@@ -142,8 +150,8 @@ export class YellowCardProviderProcessor
       const { channel, network } = await this.getNetworskAndChannels(
         "withdraw",
         country,
-        // bankCode,
-        "011",
+        bankCode,
+        // "011",
       );
 
       // We are sending the fiat to the user (Submitting payout request)
@@ -174,12 +182,12 @@ export class YellowCardProviderProcessor
               phone: "+2349032435663",
               email: "cyrilameh1313@gmail.com",
               country: "NG",
-              address: "23 Savage Crescent, G.R.A, Enugu",
-              dob: "01/15/1998",
-              idNumber: "123456789",
+              address: "flat 11, Anambara estate, Ajaokuta",
+              dob: "08/30/1999",
+              idNumber: "68729756694",
               idType: "NIN",
               additionalIdType: "BVN",
-              additionalIdNumber: "123456",
+              additionalIdNumber: "22475885816",
             },
           },
         });
@@ -240,6 +248,25 @@ export class YellowCardProviderProcessor
       method: "GET",
       endpoint: ratesUrl,
     });
+
+    rates.push(
+      {
+        buy: 1,
+        sell: 1,
+        locale: "crypto",
+        rateId: "usd-coin",
+        code: "USDC",
+        updatedAt: "2025-10-23T17:18:20.565Z",
+      },
+      {
+        buy: 3888.2737,
+        sell: 3888.2737,
+        locale: "crypto",
+        rateId: "ethereum",
+        code: "ETH",
+        updatedAt: "2025-10-23T17:20:11.768Z",
+      },
+    );
 
     // Return a specific rates...
     return rates.filter((rate) => params.includes(rate.code.toLowerCase()));

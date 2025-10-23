@@ -28,6 +28,7 @@ export type InitiateMerchantPMTParams =
       origin: PaymentOrigin;
       walletUsed: "internal" | "external";
       countryCode: CountryCode;
+      fromAddr?: string;
       bankDetails: {
         code: string; // refers to the bankCode
         number: string;
@@ -45,6 +46,7 @@ export type InitiateMerchantPMTParams =
     }
   | {
       newTransaction: "false";
+      fromAddr?: string;
       type: "merchant" | "external";
       origin: PaymentOrigin;
       walletUsed: "internal" | "external";

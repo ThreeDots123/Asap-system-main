@@ -57,6 +57,7 @@ export class PaymentService {
       rateId,
       walletUsed,
       merchantTransaction,
+      fromAddr,
     } = opts;
 
     const initiatedOfframpTxn =
@@ -75,7 +76,7 @@ export class PaymentService {
           chain: coinToReceive.assetChain,
           amount: coinToReceive.amount,
         },
-        fromAddr: "",
+        fromAddr: fromAddr ?? "",
         paymentOrigin: origin,
         requiresMFA: false,
         rates: {

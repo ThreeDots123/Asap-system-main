@@ -18,6 +18,7 @@ import { UpdateMerchantDto } from "./dto/update-profile.dto";
 import { MerchantService } from "./merchant.service";
 import { TransactionService } from "src/transaction/transaction.service";
 import { InitiatePaymentWithExternalWltDto } from "src/merchant-sdk/dto/initiate-payment-external-wlt.dto";
+import { getBankCode } from "src/utils/get-bank-code";
 
 @Controller("merchant")
 export class MerchantController {
@@ -76,8 +77,10 @@ export class MerchantController {
       if (settlementAccount.accountNumber)
         updateOps["settlementAccount.accountNumber"] =
           settlementAccount.accountNumber;
-      if (settlementAccount.bank)
-        updateOps["settlementAccount.bank"] = settlementAccount.bank;
+      if (settlementAccount.bank) {
+        const bankCode = getBankCode(settlementAccount.bank);
+        updateOps["settlementAccount.bank"] = bankCode;
+      }
     }
 
     if (updatedWebsiteUrl) updateOps["websiteUrl"] = updatedWebsiteUrl;

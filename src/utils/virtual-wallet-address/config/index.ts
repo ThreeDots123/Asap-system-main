@@ -1,6 +1,7 @@
 import Factory from "./factory.json";
 import Router from "./server-router.json";
 import PairERC20 from "./pair-erc20.json";
+import { ALCHEMY_USE_MAINNET } from "src/config/env/list";
 
 // Uniswap V2 ABIs
 export const UNISWAP_ROUTER_V2_ABI = Router;
@@ -26,7 +27,13 @@ export const ETH_WETH = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
 export const BASE_WETH = "0x4200000000000000000000000000000000000006";
 
 // Ethereum USDC address
-export const ETH_USDC = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+export const ETH_USDC =
+  process.env[ALCHEMY_USE_MAINNET] === "true"
+    ? "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    : "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 
 // Base USDC address
-export const BASE_USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+export const BASE_USDC =
+  process.env[ALCHEMY_USE_MAINNET] === "true"
+    ? "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    : "0x036CbD53842c5426634e7929541eC2318f3dCF7e";

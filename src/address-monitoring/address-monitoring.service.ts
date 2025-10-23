@@ -37,12 +37,12 @@ export class AddressMonitoringService implements OnModuleInit {
     else return processor.removeAddressesFromMonitoring(addresses, chain);
   }
 
-  async handleWalletActivity(address: string) {
+  async handleWalletActivity(address: string, fromAddr: string) {
     const processor = this.processAddressMonitoringProcessors(
       this.currentAddressMonitoringProcessor,
     );
 
-    await processor.handleAddressActivityEvent(address);
+    await processor.handleAddressActivityEvent(address, fromAddr);
     return;
   }
 
