@@ -50,10 +50,12 @@ export class MerchantController {
       publicKey: apiKey,
       secretKey,
       fullname,
-      ...(settlementAccount && {
+      ...{
         ...settlementAccount,
-        bank: getBankName(settlementAccount.bank),
-      }),
+        bank: settlementAccount.bank
+          ? getBankName(settlementAccount.bank)
+          : undefined,
+      },
     };
   }
 
