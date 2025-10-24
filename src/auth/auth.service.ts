@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import crypto from "crypto";
+import { randomBytes } from "crypto";
 import { add } from "date-fns";
 import { CountryCode } from "libphonenumber-js";
 import { Model } from "mongoose";
@@ -815,13 +815,9 @@ export class AuthService {
    * @returns {{apiKey: string; secretKey: string}} The ApiKey credentials for a merchant
    */
   private generateMerchantApiKeys(mode: "test" | "live") {
-    const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-      modulusLength: 2048, // RSA 2048-bit encryption
-    });
-
     return {
-      publicKey: `pub_${mode}_${publicKey}`,
-      secretKey: `sec_${mode}_${privateKey}`,
+      apiKey: `pub_${mode}_${randomBytes(32).toString("hex")}`,
+      secretKey: `sec_${mode}_${randomBytes(32).toString("hex")}`,
     };
   }
 }

@@ -62,8 +62,8 @@ export class Merchant {
   settlementAccount: MerchantSettlementAccount;
 
   @Prop({
-    enum: ["pending", "verified", "suspended", "blocked"],
-    default: "verified",
+    enum: ["pending", "active", "suspended", "blocked"],
+    default: "active",
   })
   status: MerchantStatus;
 
