@@ -63,7 +63,7 @@ export class Merchant {
 
   @Prop({
     enum: ["pending", "verified", "suspended", "blocked"],
-    default: "pending",
+    default: "verified",
   })
   status: MerchantStatus;
 

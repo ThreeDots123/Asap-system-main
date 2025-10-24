@@ -88,3 +88,4 @@ Create admin guards (for rate)
 <!-- Used NG statically in external wallet monitoring -->
 
 <!-- Increased the query pagination limit for transactions and Increased access token from 1h to 30d -->
+<!-- Set merchant status default to verified on account creation -->
