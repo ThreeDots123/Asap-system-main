@@ -18,7 +18,7 @@ import { UpdateMerchantDto } from "./dto/update-profile.dto";
 import { MerchantService } from "./merchant.service";
 import { TransactionService } from "src/transaction/transaction.service";
 import { InitiatePaymentWithExternalWltDto } from "src/merchant-sdk/dto/initiate-payment-external-wlt.dto";
-import { getBankCode } from "src/utils/get-bank-code";
+import { getBankCode, getBankName } from "src/utils/get-bank-code";
 
 @Controller("merchant")
 export class MerchantController {
@@ -50,7 +50,10 @@ export class MerchantController {
       publicKey: apiKey,
       secretKey,
       fullname,
-      ...(settlementAccount && { ...settlementAccount }),
+      ...(settlementAccount && {
+        ...settlementAccount,
+        bank: getBankName(settlementAccount.bank),
+      }),
     };
   }
 
