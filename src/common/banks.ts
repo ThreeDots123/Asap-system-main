@@ -26,6 +26,7 @@ const NIGERIAN_BANKS = new Map<string, string>([
   ["unity bank", "215"],
   ["wema bank", "035"],
   ["zenith bank", "057"],
+  ["test bank", "001"],
   // Add more banks as needed
 ]);
 

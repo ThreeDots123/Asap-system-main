@@ -199,7 +199,7 @@ export class AuthService {
 
     //  Merchant verifies email on signup
     this.eventService.emit(created.merchant, {
-      event: new MerchantAcctCreatedEvent(newMerchant, merchantOtp),
+      event: new MerchantAcctCreatedEvent(newMerchant),
     });
 
     const authorizationTokens = await this.createAuthorizationTokens({
@@ -462,19 +462,10 @@ export class AuthService {
 
     try {
       // Example Email Otp (Not yet implementes)
-      await this.emailService.sendMail(
-        email,
-        "Verify your account",
-        `Please verify your email address by clicking the link below:
-
-        ${merchantOtp}
-
-        If you did not create an account with ASAP Merchant, please ignore this email.
-
-        Best regards,  
-        The {{appName}} Team
-      `,
-      );
+      await this.emailService.verificatonMail(email, "Verify your account", {
+        otpCode: String(merchantOtp),
+        from: { name: "Asap Merchant" },
+      });
 
       return {
         message: "Your OTP Email has been sent",
@@ -507,7 +498,8 @@ export class AuthService {
       otpToken,
     );
 
-    if (!isTokenValid) throw new BadRequestException("Token is not valid.");
+    if (!isTokenValid)
+      throw new BadRequestException("Unable to verify account. Invalid token");
 
     await this.merchantService.update(merchantId, {
       $set: { status: "active" },

@@ -9,7 +9,7 @@ import { MerchantService } from "src/merchant/merchant.service";
 import { TokenService } from "src/token/token.service";
 
 @Injectable()
-export class VerifiedMerchant implements CanActivate {
+export class IsMerchant implements CanActivate {
   constructor(
     private baseTokenService: TokenService,
     private baseMerchantService: MerchantService,
@@ -31,12 +31,6 @@ export class VerifiedMerchant implements CanActivate {
 
       const merchant = await this.baseMerchantService.findById(payload.sub);
       if (!merchant) throw new UnauthorizedException("Merchant not found");
-
-      // Ensure that this user has completed their account setup
-      if (merchant.status !== "active")
-        throw new UnauthorizedException(
-          "Not permitted to access this route. Account not authorised. Complete account setup or account has been suspended or blocked.",
-        );
 
       request.merchant = merchant;
       return true;

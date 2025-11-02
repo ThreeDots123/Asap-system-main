@@ -7,6 +7,7 @@ import {
   HttpCode,
   Post,
   Req,
+  Res,
   Session,
   UnauthorizedException,
   UseGuards,
@@ -14,7 +15,7 @@ import {
 import { CreateUserAcctDto } from "./dto/create-user-account.dto";
 import { AuthService } from "src/auth/auth.service";
 import { SessionPayload } from "src/common/types/session-payload";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { UserDocument } from "src/models/user.entity";
 import { CompleteAccountVerificationDto } from "./dto/complete-account-verification.dto";
 import { AccountVerificationAuthGuard } from "src/auth/guards/account-setup/account-verification.guard";
@@ -119,12 +120,13 @@ export class AccountController {
     return { message: "Account has been verified successfully" };
   }
 
-  @Post("user/access-token")
+  @Post("access-token")
   @HttpCode(200)
   async retrieveNewAccessToken(
     @Session() session: SessionPayload,
     @Headers() header: ClientTypeHeaderDto,
     @Body() _body: RefreshTokenDto,
+    @Res({ passthrough: true }) response: Response,
   ) {
     if (!header["x-client-type"])
       throw new BadRequestException("x-client-type expected in header.");
@@ -154,6 +156,25 @@ export class AccountController {
       refreshTokenId,
       refreshToken,
     );
+
+    if (header["x-client-type"] === "web") {
+      // Check if merchant passed an accessToken key, if they did, we persist their access token to cookie (Not session with that value as the key)
+      if (header["x-access-key"]) {
+        const accessTokenId = header["x-access-key"];
+
+        // Set cookie directly
+        response.cookie(accessTokenId, accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          expires: new Date(Date.now() + 1000 * 60 * 59), // 59 Minutes
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          domain:
+            process.env.NODE_ENV === "production"
+              ? ".asapcrypto.xyz"
+              : undefined,
+        });
+      }
+    }
 
     return { accessToken };
   }
@@ -223,7 +244,6 @@ export class AccountController {
       await this.authService.registerMerchantDetails(_body);
 
     // Save refresh token to user session if client is web but for now the user section is controlled by a mobile app
-
     if (header["x-client-type"] !== "mobile") {
       session.refreshToken = authorizationTokens.refresh.token;
       session.refreshId = authorizationTokens.refresh.id;

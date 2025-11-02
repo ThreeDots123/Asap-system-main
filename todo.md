@@ -83,9 +83,4 @@ Create admin guards (for rate)
 
 <!-- Loophole - Checking balance at every stage of transaction and Consistency - Since we can't make transactional queries. we. find another option (Esp for internal transactions)-->
 
-<!-- 011 is statically used... remove before production -->
-
 <!-- Used NG statically in external wallet monitoring -->
-
-<!-- Increased the query pagination limit for transactions and Increased access token from 1h to 30d -->
-<!-- Set merchant status default to verified on account creation -->

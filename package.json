@@ -46,6 +46,7 @@
     "libphonenumber-js": "^1.12.11",
     "mongodb": "^6.18.0",
     "mongoose": "^8.17.1",
+    "node-mailjet": "^6.0.11",
     "nodemailer": "^7.0.9",
     "redis": "^5.8.1",
     "reflect-metadata": "^0.2.2",

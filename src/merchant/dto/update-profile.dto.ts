@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
-import { IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsOptional, IsString, Length, ValidateNested } from "class-validator";
 
 class SettlementDto {
   @ApiProperty({ required: false, example: "John doe Emmanuel" })
@@ -15,10 +15,11 @@ class SettlementDto {
   @Expose()
   accountNumber?: string;
 
-  @ApiProperty({ required: false, example: "Firstbank" })
+  @ApiProperty({ required: false, example: "011" })
   @IsOptional()
   @IsString()
   @Expose()
+  @Length(3, 5)
   bank?: string;
 }
 

@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from "@nestjs/common";
@@ -19,6 +20,8 @@ import { MerchantService } from "./merchant.service";
 import { TransactionService } from "src/transaction/transaction.service";
 import { InitiatePaymentWithExternalWltDto } from "src/merchant-sdk/dto/initiate-payment-external-wlt.dto";
 import { getBankCode, getBankName } from "src/utils/get-bank-code";
+import { IsMerchant } from "src/auth/guards/merchant/is-merchant.guard";
+import { PaginationQueryDto } from "./dto/pagination-query.dto";
 
 @Controller("merchant")
 export class MerchantController {
@@ -29,7 +32,7 @@ export class MerchantController {
   ) {}
 
   @Get("me")
-  @UseGuards(VerifiedMerchant)
+  @UseGuards(IsMerchant)
   async getMerchantProfile(@Req() request: Request) {
     const {
       businessName,
@@ -50,11 +53,8 @@ export class MerchantController {
       publicKey: apiKey,
       secretKey,
       fullname,
-      ...{
+      settlementAccount: {
         ...settlementAccount,
-        bank: settlementAccount.bank
-          ? getBankName(settlementAccount.bank)
-          : undefined,
       },
     };
   }
@@ -83,8 +83,10 @@ export class MerchantController {
         updateOps["settlementAccount.accountNumber"] =
           settlementAccount.accountNumber;
       if (settlementAccount.bank) {
-        const bankCode = getBankCode(settlementAccount.bank);
-        updateOps["settlementAccount.bank"] = bankCode;
+        // Ensure the bank exisits for the code sent
+
+        getBankName(settlementAccount.bank); // Does the validation
+        updateOps["settlementAccount.bank"] = settlementAccount.bank;
       }
     }
 
@@ -174,11 +176,15 @@ export class MerchantController {
 
   @Get("transactions")
   @UseGuards(VerifiedMerchant)
-  async getAllMerchantTransactions(@Req() request: Request) {
+  async getAllMerchantTransactions(
+    @Req() request: Request,
+    @Query() query: PaginationQueryDto,
+  ) {
     const { _id } = request.merchant as MerchantDocument;
 
     return this.transactionService.retieveAllMerchantTransactions(
       _id as Types.ObjectId,
+      { page: query.page, limit: query.limit },
     );
   }
 

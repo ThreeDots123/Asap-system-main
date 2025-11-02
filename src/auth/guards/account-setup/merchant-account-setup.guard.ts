@@ -38,7 +38,7 @@ export class MerchantAccountVerificationAuthGuard implements CanActivate {
       // Ensure that this merchant has not completed their account setup
       if (merchant.status !== "pending")
         throw new UnauthorizedException(
-          "Merchant not authorised to use this route. Already completed this step or has been suspended or blocked.",
+          "Already completed this step or has been suspended or blocked.",
         );
 
       request.merchant = merchant;

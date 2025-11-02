@@ -450,8 +450,11 @@ export class TransactionService {
     query?: { page?: number; limit?: number; status?: string },
   ) {
     // const { page = 1, limit = 20, status } = query || {};
-    const { page = 1, limit = 100, status } = query || {};
-    const filter: any = { merchantId };
+    const { page = 1, limit = 15, status } = query || {};
+    const filter: any = {
+      merchantId,
+      status: { $ne: MerchantTransactionStatus.INITIATED },
+    };
     if (status) filter.status = status;
 
     const [transactions, total] = await Promise.all([
@@ -464,7 +467,7 @@ export class TransactionService {
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
-      this.transactionModel.countDocuments(filter),
+      this.merchantTransactionModel.countDocuments(filter),
     ]);
 
     return {

@@ -61,8 +61,9 @@ async function bootstrap() {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // Use secure cookies in production
         maxAge: 30 * 24 * 60 * 60 * 1000, // 7 days
-        ...(configService.get<string>(NODE_ENV, "development") !==
-          "development" && { sameSite: "none" as const }),
+        ...(configService.get<string>(NODE_ENV, "development") !== "development"
+          ? { sameSite: "none" as const }
+          : { sameSite: "lax" }),
         ...(configService.get<string>(NODE_ENV, "development") !==
           "development" && { domain: ".asapcrypto.xyz" }),
       },
