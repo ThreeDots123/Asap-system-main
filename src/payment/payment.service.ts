@@ -91,8 +91,7 @@ export class PaymentService {
     await merchantTransaction.save();
     await initiatedOfframpTxn.save();
 
-    if (walletUsed === "external")
-      return initiatedOfframpTxn.transactionReference;
+    if (walletUsed === "external") return initiatedOfframpTxn;
 
     // Initiate withdrawal for internal transactions
     // What should be returned?

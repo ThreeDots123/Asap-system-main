@@ -21,6 +21,7 @@ import ExternalWalletAddressUtil from "src/utils/virtual-wallet-address";
 import { TransactionService } from "src/transaction/transaction.service";
 import { PaymentService } from "src/payment/payment.service";
 import { MerchantService } from "src/merchant/merchant.service";
+import { LedgerService } from "src/ledger/ledger.service";
 
 export const providerId = AddressMonitoringProcessorType.ALCHEMY;
 
@@ -44,6 +45,7 @@ export class AlchemyProcessor
     private transactionService: TransactionService,
     private paymentService: PaymentService,
     private merchantService: MerchantService,
+    private ledgerService: LedgerService,
   ) {
     super(
       walletService,
@@ -51,6 +53,7 @@ export class AlchemyProcessor
       transactionService,
       paymentService,
       merchantService,
+      ledgerService,
     );
   }
 

@@ -34,6 +34,7 @@ import { AddressMonitoringModule } from './address-monitoring/address-monitoring
 import { EmailModule } from './email/email.module';
 import { MerchantSdkModule } from './merchant-sdk/merchant-sdk.module';
 import { BankModule } from './bank/bank.module';
+import { KycModule } from './kyc/kyc.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { BankModule } from './bank/bank.module';
     EmailModule,
     MerchantSdkModule,
     BankModule,
+    KycModule,
   ],
   controllers: [AppController],
   providers: [AppService],

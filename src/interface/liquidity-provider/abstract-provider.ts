@@ -13,6 +13,8 @@ import {
 import { UserType } from "src/common/types/wallet-custody";
 import { emittedEvents } from "src/gateway/events";
 import { SocketGateway } from "src/gateway/socket.gateway";
+import { LedgerService } from "src/ledger/ledger.service";
+import { AccountOrigin, AccountType } from "src/models/ledger/entry.entity";
 import { MerchantTransactionStatus } from "src/models/merchant-transaction.entitiy";
 import { PaymentTransactionStatus } from "src/models/offramp-transaction";
 import { TransactionService } from "src/transaction/transaction.service";
@@ -24,6 +26,7 @@ export abstract class AbstractLiquidityProvider {
   constructor(
     private baseTransactionService: TransactionService,
     private baseSocketGateway: SocketGateway,
+    private baseLedgerService: LedgerService,
   ) {}
 
   /**
@@ -63,10 +66,6 @@ export abstract class AbstractLiquidityProvider {
     );
 
     if (!result.success) throw new BadRequestException(result.error);
-
-    // Save transaction entry to ledger money debited from platform hot wallet (No here tho)
-    // Credit - Platform's hot wallet (Liquidity provider balance is reduced by a specified amount we are to send to a user)
-
     return result.result;
   }
 
@@ -101,6 +100,7 @@ export abstract class AbstractLiquidityProvider {
         case PaymentTransactionStatus.PENDING:
           merchantTxn.status = MerchantTransactionStatus.PROCESSING;
           break;
+
         case PaymentTransactionStatus.COMPLETED: {
           merchantTxn.status = MerchantTransactionStatus.COMPLETED;
 
@@ -128,11 +128,102 @@ export abstract class AbstractLiquidityProvider {
                 fromAddr: transaction.fromAddr,
               },
             });
+
+          // Record ledger entry for merchant transaction completion
+          await this.baseLedgerService.recordBulkTransactionEntries(
+            [
+              // Debit -> Merchant liability (Reduce liability - merchant has been paid)
+              {
+                type: "debit",
+                amount: merchantTxn.amount,
+                accountId: merchantTxn.merchantId as Types.ObjectId,
+                accountOrigin: AccountOrigin.MERCHANT,
+                accountType: AccountType.LIABILITY,
+                representation: "-" + merchantTxn.amount,
+                metadata: {
+                  currency: merchantTxn.currency,
+                  chain: chain,
+                  asset: asset,
+                  coinAmount: coinAmount,
+                  note: "Merchant liability reduced - settlement completed, user paid",
+                  transactionReference: merchantTxn.reference,
+                  payoutReference: transaction.transactionReference,
+                },
+              },
+              // Credit -> Platform fiat account (Fiat sent to merchant's bank account)
+              {
+                type: "credit",
+                amount: merchantTxn.amount,
+                accountId: "nil",
+                accountOrigin: AccountOrigin.PLATFORM,
+                accountType: AccountType.ASSET,
+                representation: "-" + merchantTxn.amount,
+                metadata: {
+                  currency: merchantTxn.currency,
+                  processedBy: this.providerId,
+                  note: "Platform fiat account debited - user settlement completed",
+                  transactionReference: merchantTxn.reference,
+                },
+              },
+            ],
+            transaction._id as Types.ObjectId,
+            `Merchant transaction settlement completed - ${merchantTxn.reference}`,
+          );
+
+          // Close the ledger entry
+          await this.baseLedgerService.closeLedgerEntry(
+            transaction._id as Types.ObjectId,
+          );
+
           break;
         }
         case PaymentTransactionStatus.FAILED:
           merchantTxn.status = MerchantTransactionStatus.FAILED;
           // Send event too?
+
+          // Record ledger entry for merchant transaction failure
+          // Record reversal entries for failed payout
+          await this.baseLedgerService.recordBulkTransactionEntries(
+            [
+              // Credit -> Platform hot wallet (Reverse the debit - refund fiat back)
+              {
+                type: "credit",
+                amount: transaction.sentAmount.amount,
+                accountId: "nil",
+                accountOrigin: AccountOrigin.PLATFORM,
+                accountType: AccountType.ASSET,
+                representation: "+" + transaction.sentAmount.amount,
+                metadata: {
+                  currency: transaction.sentAmount.currency,
+                  processedBy: this.providerId,
+                  note: "Platform hot wallet credited - payout failed, funds returned",
+                  transactionReference: transactionReference,
+                },
+              },
+              // Debit -> Platform liability (Reverse the credit - customer still owed)
+              {
+                type: "debit",
+                amount: transaction.sentAmount.amount,
+                accountId: "nil",
+                accountOrigin: AccountOrigin.PLATFORM,
+                accountType: AccountType.LIABILITY,
+                representation: "+" + transaction.sentAmount.amount,
+                metadata: {
+                  currency: transaction.sentAmount.currency,
+                  processedBy: this.providerId,
+                  note: "Platform liability increased - payout failed, customer still owed",
+                  transactionReference: transactionReference,
+                },
+              },
+            ],
+            transaction._id as Types.ObjectId,
+            `Payout failure reversal - ${transactionReference}`,
+          );
+
+          // Close the ledger entry
+          await this.baseLedgerService.closeLedgerEntry(
+            transaction._id as Types.ObjectId,
+          );
           break;
 
         default:

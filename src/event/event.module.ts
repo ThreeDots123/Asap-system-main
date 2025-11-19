@@ -6,6 +6,7 @@ import { GatewayModule } from "src/gateway/gateway.module";
 import { subscribers } from "./subscribers";
 import { LiquidityProviderModule } from "src/liquidity-provider/liquidity-provider.module";
 import { EmailModule } from "src/email/email.module";
+import { LedgerModule } from "src/ledger/ledger.module";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { EmailModule } from "src/email/email.module";
     GatewayModule,
     LiquidityProviderModule,
     EmailModule,
+    LedgerModule,
   ],
   providers: [EventService, ...subscribers],
   exports: [EventEmitterModule, EventService],

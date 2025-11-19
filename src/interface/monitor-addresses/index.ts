@@ -3,11 +3,16 @@ import { Types } from "mongoose";
 import { AddressMonitoringProcessorType } from "src/common/types/address-monitoring";
 import { AvailableWalletChains } from "src/common/types/wallet-custody";
 import { MerchantService } from "src/merchant/merchant.service";
-import { PaymentOrigin } from "src/models/offramp-transaction";
+import { AccountOrigin, AccountType } from "src/models/ledger/entry.entity";
+import {
+  OfframpTransactionDocument,
+  PaymentOrigin,
+} from "src/models/offramp-transaction";
 import { PaymentService } from "src/payment/payment.service";
 import { TransactionService } from "src/transaction/transaction.service";
 import ExternalWalletAddressUtil from "src/utils/virtual-wallet-address";
 import { WalletService } from "src/wallet/wallet.service";
+import { LedgerService } from "src/ledger/ledger.service";
 
 @Injectable()
 export abstract class AbstractAddressMonitoringProcessor {
@@ -17,6 +22,7 @@ export abstract class AbstractAddressMonitoringProcessor {
     private baseTransactionService: TransactionService,
     private basePaymentService: PaymentService,
     private baseMerchantService: MerchantService,
+    private baseLedgerService: LedgerService,
   ) {}
   async addAddressesForMonitoring(
     addresses: string[],
@@ -55,7 +61,7 @@ export abstract class AbstractAddressMonitoringProcessor {
 
         if (!merchantTxn) return;
 
-        let offrampTxnReference: string;
+        let offrampTransaction: OfframpTransactionDocument;
         if (!merchantTxn.offrampId) {
           const merchant = await this.baseMerchantService.findById(
             merchantTxn.merchantId.toString(),
@@ -63,7 +69,7 @@ export abstract class AbstractAddressMonitoringProcessor {
 
           if (!merchant) return;
 
-          offrampTxnReference =
+          offrampTransaction =
             await this.basePaymentService.intiatePaymentRequestToMerchant(
               merchantTxn.merchantId,
               {
@@ -93,23 +99,64 @@ export abstract class AbstractAddressMonitoringProcessor {
             );
         } else {
           // Get offramp transaction using the offramp id and then assign it
-          const offrampTxn =
+          const retrievedOfframpTransaction =
             await this.baseTransactionService.retrieveOfframpTransactionById(
               merchantTxn.offrampId,
             );
 
-          if (!offrampTxn) return;
+          if (!retrievedOfframpTransaction) return;
 
-          offrampTxnReference = offrampTxn.transactionReference;
+          offrampTransaction = retrievedOfframpTransaction;
         }
 
         // Process offramping and payout
         await this.basePaymentService.processPaymentUsingReference(
-          offrampTxnReference,
+          offrampTransaction.transactionReference,
         );
 
         this.baseWalletService.updateExternalWalletToSettled(
           foundAddressWlt.address,
+        );
+
+        // Record ledger entry for merchant payment received
+        await this.baseLedgerService.recordBulkTransactionEntries(
+          [
+            // Debit -> Platform hot wallet (Crypto asset increase) - Crypto received from customer
+            {
+              type: "debit",
+              amount: merchantTxn.coinAsset.amount,
+              accountId: "nil",
+              accountOrigin: AccountOrigin.PLATFORM,
+              accountType: AccountType.ASSET,
+              representation: "+" + merchantTxn.coinAsset.amount,
+              metadata: {
+                chain: merchantTxn.coinAsset.chain,
+                asset: merchantTxn.coinAsset.asset,
+                note: "Platform hot wallet increased - merchant received crypto payment",
+                fromAddress: addrSentFrom,
+                toAddress: address,
+              },
+            },
+            // Credit -> Merchant liability (Amount owed to merchant)
+            {
+              type: "credit",
+              amount: merchantTxn.amount,
+              accountId: merchantTxn.merchantId as Types.ObjectId,
+              accountOrigin: AccountOrigin.MERCHANT,
+              accountType: AccountType.LIABILITY,
+              representation: "+" + merchantTxn.amount,
+              metadata: {
+                currency: merchantTxn.currency,
+                chain: merchantTxn.coinAsset.chain,
+                asset: merchantTxn.coinAsset.asset,
+                coinAmount: merchantTxn.coinAsset.amount,
+                note: "Merchant liability increased - payment received from customer",
+                transactionReference: merchantTxn.reference,
+              },
+            },
+          ],
+          offrampTransaction._id as Types.ObjectId,
+          `Merchant payment received - ${merchantTxn.reference}`,
         );
       }
 

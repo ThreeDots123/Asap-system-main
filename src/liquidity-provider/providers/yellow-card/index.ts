@@ -45,6 +45,7 @@ import { CountryCode } from "libphonenumber-js";
 import { TransactionService } from "src/transaction/transaction.service";
 import { PaymentTransactionStatus } from "src/models/offramp-transaction";
 import { SocketGateway } from "src/gateway/socket.gateway";
+import { LedgerService } from "src/ledger/ledger.service";
 
 export const providerId = LiquidityProviderProcessorType.YC;
 
@@ -63,8 +64,9 @@ export class YellowCardProviderProcessor
     private configService: ConfigService,
     private transactionService: TransactionService,
     private socketGateway: SocketGateway,
+    private ledgerService: LedgerService,
   ) {
-    super(transactionService, socketGateway);
+    super(transactionService, socketGateway, ledgerService as LedgerService);
     this.baseUrl =
       configService.getOrThrow(ALCHEMY_USE_MAINNET) === "true"
         ? "https://api.yellowcard.io"

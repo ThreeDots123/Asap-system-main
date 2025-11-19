@@ -59,21 +59,16 @@ export default class ExternalWalletAddressUtil {
     // 🚫 For non-Ethereum chains → tokenAddress is required
     const tokenAddress =
       chain === AvailableWalletChains.BASE ? BASE_USDC : ETH_USDC;
-    console.log("1");
     const contract = new ethers.Contract(
       tokenAddress,
       UNISWAP_PAIR_ERC20_V2_ABI.abi,
       provider,
     );
 
-    console.log(address);
     const [balance, decimals] = await Promise.all([
       contract.balanceOf(address),
       contract.decimals(),
     ]);
-    console.log(balance, decimals);
-
-    console.log("2");
     return ethers.formatUnits(balance, decimals);
   }
 
@@ -89,7 +84,6 @@ export default class ExternalWalletAddressUtil {
         break;
     }
 
-    console.log(rpc);
     return new ethers.JsonRpcProvider(rpc);
   }
 }

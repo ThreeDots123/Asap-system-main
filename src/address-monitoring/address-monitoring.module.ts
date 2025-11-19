@@ -6,6 +6,7 @@ import { UtilsModule } from "src/utils/utils.module";
 import { TransactionModule } from "src/transaction/transaction.module";
 import { MerchantModule } from "src/merchant/merchant.module";
 import { PaymentModule } from "src/payment/payment.module";
+import { LedgerModule } from "src/ledger/ledger.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PaymentModule } from "src/payment/payment.module";
     TransactionModule,
     forwardRef(() => MerchantModule),
     PaymentModule,
+    LedgerModule,
   ],
   providers: [AddressMonitoringService, ...ADDRESSES_MONITORING_PROCESSORS],
   exports: [AddressMonitoringService, ...ADDRESSES_MONITORING_PROCESSORS],
