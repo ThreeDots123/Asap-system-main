@@ -1,19 +1,11 @@
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import session from "express-session";
-import * as connectRedis from "connect-redis";
-import Redis from "ioredis";
 import { AppModule } from "./app.module";
 import { ResponseTransformerInterceptor } from "./interceptors/response.interceptor";
 import { ExceptionFilter } from "./interceptors/exception-filter.interceptor";
 import { ConfigService } from "@nestjs/config";
-import {
-  CORS_WHITELIST_URLS,
-  NODE_ENV,
-  PORT,
-  SESSION_SECRET,
-} from "./config/env/list";
-import { REDIS_CLIENT } from "./redis/redis.module";
+import { CORS_WHITELIST_URLS, NODE_ENV, PORT, SESSION_SECRET } from "./config/env/list";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -40,32 +32,26 @@ async function bootstrap() {
   //* Handle Exceptions
   app.useGlobalFilters(new ExceptionFilter());
 
-  // Setup sessions with redis
-  const redisClient = app.get<Redis>(REDIS_CLIENT);
-
-  // @ts-ignore
-  const redisStore = new connectRedis.RedisStore({
-    client: redisClient,
-    prefix: "asap",
-    ttl: 1,
-  });
+  // Setup sessions with in-memory store (Redis disabled)
+  const memoryStore = new session.MemoryStore();
 
   app.use(
     session({
       secret: configService.getOrThrow<string>(SESSION_SECRET),
       name: "sid",
       resave: false,
-      store: redisStore,
+      store: memoryStore,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 7 days
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
         ...(configService.get<string>(NODE_ENV, "development") !== "development"
           ? { sameSite: "none" as const }
           : { sameSite: "lax" }),
-        ...(configService.get<string>(NODE_ENV, "development") !==
-          "development" && { domain: ".asapcrypto.xyz" }),
+        ...(configService.get<string>(NODE_ENV, "development") !== "development" && {
+          domain: ".asapcrypto.xyz",
+        }),
       },
     }),
   );

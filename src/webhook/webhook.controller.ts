@@ -1,5 +1,5 @@
-import { Body, Controller, HttpCode, Post, Req } from "@nestjs/common";
-import { Request } from "express";
+import { Body, Controller, Get, HttpCode, Post, Query, Req, Res } from "@nestjs/common";
+import { Request, Response } from "express";
 import * as crypto from "crypto";
 import { ConfigService } from "@nestjs/config";
 import {
@@ -7,6 +7,7 @@ import {
   ALCHEMY_ETH_SIGNING_KEY,
   ALCHEMY_USE_MAINNET,
   BLOCKRADAR_GLOBAL_API_KEY,
+  WHATSAPP_APP_SECRET,
   YC_SECRET_KEY,
 } from "src/config/env/list";
 import { LiquidityProviderService } from "src/liquidity-provider/liquidity-provider.service";
@@ -20,6 +21,8 @@ import {
 } from "src/common/types/wallet-custody";
 import { WebhookEventPayload } from "src/address-monitoring/processors/alchemy/types";
 import { AddressMonitoringService } from "src/address-monitoring/address-monitoring.service";
+import { WhatsappWebhookPayload } from "src/wa-bot/utils/types";
+import { WaBotService } from "src/wa-bot/wa-bot.service";
 
 @Controller("webhook")
 export class WebhookController {
@@ -28,6 +31,7 @@ export class WebhookController {
     private liquidityProviderService: LiquidityProviderService,
     private walletCustodialService: WalletCustodialService,
     private addressMonitoringService: AddressMonitoringService,
+    private waBotService: WaBotService,
   ) {}
 
   // Dedicate a webhook url for each Liquidity Provider. Because there are multiple event scenarios to listen for
@@ -162,6 +166,61 @@ export class WebhookController {
           default:
             break;
         }
+      }
+    }
+
+    return;
+  }
+
+  // Webhook verification
+  @Get("whatsapp")
+  @HttpCode(200)
+  verifyWebhook(
+    @Query("hub.mode") mode: string,
+    @Query("hub.verify_token") verifyToken: string,
+    @Query("hub.challenge") challenge: string,
+    @Res() res: Response,
+  ) {
+    if (mode === "subscribe" && this.waBotService.verifyWebhookToken(verifyToken)) {
+      return res.status(200).send(challenge);
+    }
+
+    return res.status(403).send("Verification failed");
+  }
+
+  // Dedicate a webhook url for WhatsApp.
+  @Post("whatsapp")
+  @HttpCode(200)
+  async handleWhatsAppWebhook(
+    @Req() request: Request,
+    @Body() _body: Record<string, any>,
+  ) {
+    // Check WhatsApp authorization
+    const WHATSAPP_SIGNATURE_HEADER = request.headers["x-hub-signature-256"]?.toString().split("=")[1];
+    const webhookEvent = _body as WhatsappWebhookPayload;
+    const signingKey = this.configService.getOrThrow(WHATSAPP_APP_SECRET);
+
+    if (WHATSAPP_SIGNATURE_HEADER) {
+      const computedSignature = crypto
+        .createHmac(
+          "sha256",
+          signingKey,
+        )
+        .update(JSON.stringify(_body), "utf-8")
+        .digest("hex");
+
+      console.log(WHATSAPP_SIGNATURE_HEADER, computedSignature, WHATSAPP_SIGNATURE_HEADER === computedSignature)
+
+      if (WHATSAPP_SIGNATURE_HEADER === computedSignature) {
+        // Run Whatsapp webhook handler
+        console.log(
+          "Processing webhook event:",
+          JSON.stringify(webhookEvent, null, 2),
+        );
+
+        await this.waBotService.handleIncomingWebhook(webhookEvent);
+
+        return "OK";
       }
     }
 

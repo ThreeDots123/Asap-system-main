@@ -35,6 +35,7 @@ import { EmailModule } from './email/email.module';
 import { MerchantSdkModule } from './merchant-sdk/merchant-sdk.module';
 import { BankModule } from './bank/bank.module';
 import { KycModule } from './kyc/kyc.module';
+import { WaBotModule } from './wa-bot/wa-bot.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { KycModule } from './kyc/kyc.module';
     MerchantSdkModule,
     BankModule,
     KycModule,
+    WaBotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -17,6 +17,7 @@ export const REDIS_HOST = "REDIS_HOST";
 export const REDIS_PASSWORD = "REDIS_PASSWORD";
 export const REDIS_PORT = "REDIS_PORT";
 export const REDIS_URL = "REDIS_URL";
+export const DISABLE_REDIS = "DISABLE_REDIS";
 
 export const TWILIO_ACCT = "TWILIO_ACCOUNT_SID";
 export const TWILIO_TOKEN = "TWILIO_AUTH_TOKEN";
@@ -54,6 +55,12 @@ export const MAILJET_SECRET_KEY = "EMAIL_SECRET_KEY";
 
 export const CORS_WHITELIST_URLS = "CORS_WHITELIST_URLS";
 
+export const WHATSAPP_VERIFY_TOKEN = "WHATSAPP_VERIFY_TOKEN";
+export const WHATSAPP_ACCESS_TOKEN = "WHATSAPP_ACCESS_TOKEN";
+export const WHATSAPP_BUSINESS_ACCOUNT_ID = "WHATSAPP_BUSINESS_ACCOUNT_ID";
+export const WHATSAPP_APP_SECRET = "WHATSAPP_APP_SECRET";
+export const WHATSAPP_PHONE_ID = "WHATSAPP_PHONE_ID";
+
 // Ensure these important env credentials exists else fail before the server loads up
 dotenv.config();
 [
@@ -64,9 +71,6 @@ dotenv.config();
   JWT_REFRESH_SECRET,
   JWT_PAYMENT_SECRET,
   SESSION_SECRET,
-  REDIS_HOST,
-  REDIS_PASSWORD,
-  REDIS_PORT,
   TWILIO_ACCT,
   TWILIO_TOKEN,
   TWILIO_PHONE,
@@ -79,7 +83,6 @@ dotenv.config();
   PAYSTACK_SECRET,
   YC_API_KEY,
   YC_SECRET_KEY,
-  REDIS_URL,
   BLOCKRADAR_GLOBAL_API_KEY,
   ETH_SEPOLIA_RPC_URL,
   BASE_SEPOLIA_RPC_URL,
@@ -92,7 +95,21 @@ dotenv.config();
   MAILJET_SECRET_KEY,
   CORS_WHITELIST_URLS,
   ALCHEMY_USE_MAINNET,
+  WHATSAPP_VERIFY_TOKEN,
+  WHATSAPP_ACCESS_TOKEN,
+  WHATSAPP_BUSINESS_ACCOUNT_ID,
+  WHATSAPP_APP_SECRET,
+  WHATSAPP_PHONE_ID,
 ].forEach((key) => {
   const value = process.env[key];
   if (!value) throw new Error(`config error - missing env.${key}`);
 });
+
+// Conditionally require Redis envs only if Redis is enabled
+const redisDisabled = process.env[DISABLE_REDIS] === "true";
+if (!redisDisabled) {
+  [REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, REDIS_URL].forEach((key) => {
+    const value = process.env[key];
+    if (!value) throw new Error(`config error - missing env.${key}`);
+  });
+}

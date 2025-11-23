@@ -1,16 +1,10 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from "@nestjs/common";
-import { createClient, SetOptions } from "redis";
+import { Inject, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { SetOptions } from "redis";
 import { REDIS_CLIENT } from "src/redis/redis.module";
 
 @Injectable()
 export class MemoryStoreService {
-  constructor(
-    @Inject(REDIS_CLIENT) private redisClient: ReturnType<typeof createClient>,
-  ) {}
+  constructor(@Inject(REDIS_CLIENT) private redisClient: any) {}
 
   async save(
     key: string,
