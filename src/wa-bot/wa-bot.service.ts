@@ -44,6 +44,16 @@ export class WaBotService implements OnModuleInit {
         console.log(response);
     }
 
+    public async getAllQrCodesAndDeepLinks(): Promise<void> {
+        const url = qrCodeAndDeepLinkRoute(this.phoneId);
+
+        const response = await this.execute<{}>({
+            method: "GET",
+            endpoint: url,
+        });
+        console.log(response);
+    }
+
     // Verify webhook token
     public verifyWebhookToken(passedToken: string): boolean {
         const expected = this.configService.getOrThrow<string>(
