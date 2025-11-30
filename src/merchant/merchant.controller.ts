@@ -15,7 +15,10 @@ import { MerchantDocument } from "src/models/merchant.entity";
 import { MerchantPosService } from "src/merchant-pos/merchant-pos.service";
 import { Types } from "mongoose";
 import { MerchantWithSettlementAccountGuard } from "src/auth/guards/merchant/merchant-with-settlementAcct.guard";
-import { UpdateMerchantDto } from "./dto/update-profile.dto";
+import {
+  UpdateMerchantDto,
+  UpdateWhatsappNumberDto,
+} from "./dto/update-profile.dto";
 import { MerchantService } from "./merchant.service";
 import { TransactionService } from "src/transaction/transaction.service";
 import { InitiatePaymentWithExternalWltDto } from "src/merchant-sdk/dto/initiate-payment-external-wlt.dto";
@@ -118,6 +121,33 @@ export class MerchantController {
       settlementAccount,
       id,
     };
+  }
+
+  @Patch("whatsapp")
+  @UseGuards(VerifiedMerchant)
+  async updateWhatsappNumber(
+    @Body() _body: UpdateWhatsappNumberDto,
+    @Req() request: Request,
+  ) {
+    const { id } = request.merchant as MerchantDocument;
+
+    const { whatsappNumber } = _body;
+
+    await this.merchantService.update(id, {
+      $set: {
+        whatsappNumber,
+      },
+    });
+
+    return "Whastapp number updated.";
+  }
+
+  @Get("whatsapp")
+  @UseGuards(VerifiedMerchant)
+  async getWhatsappNumber(@Req() request: Request) {
+    const { whatsappNumber } = request.merchant as MerchantDocument;
+
+    return whatsappNumber ?? null;
   }
 
   @Post("pos/initiate")

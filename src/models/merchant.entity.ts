@@ -33,7 +33,10 @@ export class Merchant {
   fullname: string;
 
   @Prop()
-  contactNumber: string;
+  contactNumber?: string;
+
+  @Prop({ required: false })
+  whatsappNumber?: string;
 
   @Prop()
   websiteUrl: string;

@@ -39,7 +39,7 @@ export class MerchantService {
   }
 
   /**
-   * Finds a user by their unique ID.
+   * Finds a merchant by their unique ID.
    * @param id - The merchant's ID.
    * @returns A merchant document or null if not found.
    */
@@ -48,13 +48,26 @@ export class MerchantService {
   }
 
   /**
-   * Finds a user by their unique ID.
+   * Finds a merchant by their unique ID.
    * @param secretKey - The merchant's ID.
    * @returns A merchant document or null if not found.
    */
   async findBySecretKey(secretKey: string): Promise<MerchantDocument | null> {
     return this.merchantModel.findOne({
       secretKey,
+    });
+  }
+
+  /**
+   * Finds a merchabnt by their whatsapp number.
+   * @param number - The whatsapp number of the current merchant.
+   * @returns A merchant document or null if not found.
+   */
+  async findMerchanrByWhatsappNo(
+    number: string,
+  ): Promise<MerchantDocument | null> {
+    return this.merchantModel.findOne({
+      whatsappNumber: number,
     });
   }
 

@@ -51,3 +51,14 @@ export class UpdateMerchantDto {
   @Expose()
   websiteUrl?: string;
 }
+
+export class UpdateWhatsappNumberDto {
+  @ApiProperty({
+    required: true,
+    description:
+      "The whatsapp number for merchant to communicate with our bot.",
+  })
+  @IsString()
+  @Expose()
+  whatsappNumber: string;
+}
